@@ -57,8 +57,7 @@ apiとfrontもそれぞれgithubにpushする
 
 （master.keyだけ変えてちゃん動くのか？・nuxtはgit cloneで動くのか？）
 
-## Herokuにデプロイする
-### server
+# Herokuにデプロイ準備(server)
 
 apiに移動
 
@@ -73,28 +72,28 @@ api $ heroku create <アプリ名> --remote prod
 
 もし名前を間違った時
 ```
-$ heroku apps:destroy --app アプリ名
+api $ heroku apps:destroy --app アプリ名
 ```
 これでheroku上のアプリは削除されるので初めから作る
 
 
 作成できたら
 ```
-$ git config --list
+api $ git config --list
 ```
 で確認
 staging環境とprod環境のherokuのgitができている
 
 
-#### Heroku上で環境変数をセットする(stagingとprod)
+## Heroku上で環境変数をセットする(stagingとprod)
 ```
-$ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled
+api $ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled
 
 # 環境変数できてるか確認
-$ heroku config -a <アプリ名>
+api $ heroku config -a <アプリ名>
 ```
 
-#### herokuのstackをコンテナに変更
+## herokuのstackをコンテナに変更
 ```
 api $ heroku stack:set container -a <アプリ名>
 
@@ -102,7 +101,7 @@ api $ heroku stack:set container -a <アプリ名>
 api $ heroku stack
 ```
 
-### serverデプロイ
+## serverデプロイ
 ```
 # staging
 api $ git push staging master
@@ -116,7 +115,7 @@ api $ git push prod master
 のエラーがまだ出ている状態
 
 
-#### herokuBD設定
+## herokuBD設定
 ```
 api $ heroku addons:create heroku-postgresql:hobby-dev -a <アプリ名>
 
@@ -127,18 +126,18 @@ api $ heroku addons
 api $ heroku run rails db:migrate -a <アプリ名>
 ```
 
-#### herokuにマスターキーを追加
+## herokuにマスターキーを追加
 ```
 api $ heroku config:set RAILS_MASTER_KEY=`cat config/master.key` -a <アプリ名>
 ```
 
-#### 再度DBの初期化を行う
+## 再度DBの初期化を行う
 
 ```
-heroku run rails db:migrate -a <アプリ名>
+api $ heroku run rails db:migrate -a <アプリ名>
 ```
 
-#### herokuタイムゾーンの確認
+## herokuタイムゾーンの確認
 ```
 #Herokuアプリに入る
 api $ heroku run sh -a <アプリ名>
@@ -152,7 +151,7 @@ Fri Jun  5 09:17:55 JST 2020
 ~$ exit
 ```
 
-#### Heroku PostgreSQLのタイムゾーンの確認
+## Heroku PostgreSQLのタイムゾーンの確認
 ```
 api $ heroku pg:info -a <アプリ名>
 
@@ -177,9 +176,62 @@ TimeZone
 :DATABASE=> \q
 ```
 
-#### Herokuアプリの確認
+## Herokuアプリの確認
 ```
 api $ heroku open -a <アプリ名>
 ```
-トップページは「ページが見つかりません」になると思うので「/api/v1/hello」にアクセスする
+トップページは「ページが見つかりません」になるので「/api/v1/hello」にアクセスする
 helloが表示されていれば成功
+
+
+# Herokuにデプロイ準備(front)
+
+## heroku.ymlの変更
+```
+build:
+  docker:
+    web: Dockerfile
+  config:
+    WORKDIR: app
+    API_URL: <RailsアプリのURL>
+    # 例) API_URL: https://my-app.herokuapp.com
+run:
+  web: yarn run start
+```
+API_URLを今回のurlに変更する
+
+## heroku login and create
+```
+front $ heroku login
+```
+
+```
+front $ heroku login
+front $ heroku create <アプリ名> --remote staging
+front $ heroku create <アプリ名> --remote prod
+```
+
+## herokuのstackをコンテナに変更
+```
+front $ heroku stack:set container
+
+# エラーが出た場合
+ ›   Error: Missing required flag:
+ ›     -a, --app APP  app to run command against
+ ›   See more help with --help
+
+# HerokuのGitURLを調べる
+front $ heroku info -a <アプリ名>
+
+# このURLをコピー
+Git URL:        https://git.heroku.com/<Herokuのアプリ名>.git
+
+# Git remoteに追加する
+front $ git remote add heroku https://git.heroku.com/<Herokuのアプリ名>.git
+
+front $ git remote -v
+
+# 成功
+heroku	https://git.heroku.com/<Herokuのアプリ名>.git (fetch)
+heroku	https://git.heroku.com/<Herokuのアプリ名>.git (push)
+```
