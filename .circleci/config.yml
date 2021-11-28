@@ -17,7 +17,7 @@ jobs:
           POSTGRES_DB: circleci_testdb
           POSTGRES_HOST_AUTH_METHOD: trust # パスワードなし
 
-    working_directory: ~/repo/api
+    working_directory: api
 
     steps:
       - checkout
@@ -25,9 +25,9 @@ jobs:
       # restore gem from cache
       - restore_cache:
           keys:
-            - gem-cache-v1-{{ checksum "~/repo/api/Gemfile.lock" }}
+            - gem-cache-v1-{{ checksum "~/api/Gemfile.lock" }}
             - gem-cache-v1-
-          working_directory: ~/repo/api
+          working_directory: api
 
       # gem install
       - run:
@@ -35,26 +35,26 @@ jobs:
             gem install bundler
             bundle config set path 'vendor/bundle'
             bundle install --jobs=4 --retry=3
-          working_directory: ~/repo/api
+          working_directory: ~/repo
 
       - save_cache:
-          key: gem-cache-v1-{{ checksum "~/repo/api/Gemfile.lock" }}
+          key: gem-cache-v1-{{ checksum "~/repo/Gemfile.lock" }}
           paths:
             - ~/repo/backend/vendor/bundle
-          working_directory: ~/repo/api
+          working_directory: ~/repo
 
       # Database setup
       - run:
           command: bundle exec rails db:create
-          working_directory: ~/repo/api
+          working_directory: ~/repo
       - run:
           command: bundle exec rails db:migrate
-          working_directory: ~/repo/api
+          working_directory: ~/repo
 
       - run:
           name: create directory to store test results
           command: mkdir /tmp/test-results
-          working_directory: ~/repo/api
+          working_directory: ~/repo
 
       # run rubocop
       - run: bundle exec rubocop
