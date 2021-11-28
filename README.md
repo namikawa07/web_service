@@ -24,7 +24,7 @@ docker-compose up できない時
 rm tmp/pids/server.pid
 ```
 
-# 作成手順
+# 環境設定の作成手順
 Templateを使ってリポジトリを作成
 
 Git clone
@@ -63,7 +63,7 @@ $ heroku create <アプリ名> --remote prod
 staging環境とprod環境のherokuのgitができている
 
 Heroku上で環境変数をセットする(stagingとprod)
-```$ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled RAILS_MASTER_KEY=`cat config/master.key` -a <アプリ名>
+```$ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled
 
 # 環境変数できてるか確認
 $ heroku config -a <アプリ名>
@@ -78,7 +78,7 @@ api $ heroku stack:set container -a <アプリ名>
 api $ heroku stack
 ```
 
-デプロイ
+## デプロイ
 ```
 # staging
 api $ git push staging master
@@ -86,3 +86,74 @@ api $ git push staging master
 # prod
 api $ git push prod master
 ```
+
+`ArgumentError: Missing `secret_key_base` for 'production' environment, set this string with `rails credentials:edit``
+のエラーがまだ出ている状態
+
+herokuBD設定
+```
+api $ heroku addons:create heroku-postgresql:hobby-dev -a <アプリ名>
+
+# 確認
+api $ heroku addons
+
+# DB初期化
+api $ heroku run rails db:migrate -a <アプリ名>
+```
+
+herokuにマスターキーを追加
+```
+api $ heroku config:set RAILS_MASTER_KEY=`cat config/master.key` -a <アプリ名>
+
+#再度DBの初期化を行う
+
+```
+heroku run rails db:migrate -a <アプリ名>
+```
+
+herokuタイムゾーンの確認
+```
+#Herokuアプリに入る
+api $ heroku run sh -a <アプリ名>
+
+~$ date
+
+#JSTになっていれば日本時間
+Fri Jun  5 09:17:55 JST 2020
+
+#抜ける
+~$ exit
+```
+
+Heroku PostgreSQLのタイムゾーンの確認
+```
+api $ heroku pg:info -a <アプリ名>
+
+...
+#名前
+Add-on: postgresql-dimensional-xxxxx
+
+#postgreSQLに入る
+api $ heroku pg:psql <PostgreSQLの名前>
+
+#例) heroku pg:psql postgresql-dimensional-xxxxx
+
+#タイムゾーン確認
+:DATABASE=> show timezone;
+
+#OK
+TimeZone
+----------
+ Etc/UTC
+(1 row)
+
+#抜ける(\はoptionを押しながら￥マーク)
+:DATABASE=> \q
+```
+
+Herokuアプリの確認
+```
+api $ heroku open
+```
+トップページは「ページが見つかりません」になると思うので「/api/v1/hello」にアクセスする
+helloが表示されていれば成功
