@@ -235,3 +235,25 @@ front $ git remote -v
 heroku	https://git.heroku.com/<Herokuのアプリ名>.git (fetch)
 heroku	https://git.heroku.com/<Herokuのアプリ名>.git (push)
 ```
+
+# RailsにAPIドメインをセットする
+railsとnuxtをつなげる
+
+```
+api $ heroku config:set API_DOMAIN=<Nuxt.jsアプリのドメイン>
+
+# 例) heroku config:set API_DOMAIN=my-app.herokuapp.com
+
+#確認
+api $ heroku config
+
+API_DOMAIN:               <Nuxt.jsアプリのドメイン>
+DATABASE_URL:             <databaseのURL>
+RACK_ENV:                 production
+RAILS_ENV:                production
+RAILS_LOG_TO_STDOUT:      enabled
+RAILS_MASTER_KEY:         <マスターキー>
+RAILS_SERVE_STATIC_FILES: enabled
+```
+
+
