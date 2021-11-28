@@ -25,60 +25,84 @@ rm tmp/pids/server.pid
 ```
 
 # 環境設定の作成手順
-Templateを使ってリポジトリを作成
+## serverとfront
 
-Git clone
+Repository templateを使ってリポジトリを作成
 
-mkdir api_sub
+```
+root $ git clone https://github.com/namikawa07/web_service.git
+```
 
-root$ docker-compose run --rm api_sub rails new . -f -B -d postgresql --api
-でrailsを作成
-Master.key以外を消してmaster.keyをapi/config内に入れる
+```
+root $ mkdir api_sub
+```
 
-Git pushする
+### railsを新しく作成
+```
+root $ docker-compose run --rm api_sub rails new . -f -B -d postgresql --api
+```
+Master.key以外を消してmaster.keyをapi/config内に入れる(master.keyだけ欲しい)
 
-apiとfrontもそれぞれgithubにgit pushする
+### Gitへpushする
+```
+root $ git add -A
+root $ git commit -m .
+root $ git push
+```
+
+### server用とfront用のgithubを作成
+
+githubからリポジトリを作成
+apiとfrontもそれぞれgithubにpushする
 
 （master.keyだけ変えてちゃん動くのか？・nuxtはgit cloneで動くのか？）
 
-Herokuにデプロイする
+## Herokuにデプロイする
+### server
 
-[apiの中]
+apiに移動
+
 ```
-Api $ heroku login
-$ heroku create <アプリ名> --remote staging
-$ heroku create <アプリ名> --remote prod
+api $ heroku login
+api $ heroku create <アプリ名> --remote staging
+api $ heroku create <アプリ名> --remote prod
 ```
 サービス名はURLとかでも表示されるのでgithubで使ってる名前が良い
 ※アンダーバー使えないので注意！
 
+
 もし名前を間違った時
-```$ heroku apps:destroy --app アプリ名
+```
+$ heroku apps:destroy --app アプリ名
 ```
 これでheroku上のアプリは削除されるので初めから作る
 
+
 作成できたら
-```$ git config --list
-```で確認
+```
+$ git config --list
+```
+で確認
 staging環境とprod環境のherokuのgitができている
 
-Heroku上で環境変数をセットする(stagingとprod)
-```$ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled
+
+#### Heroku上で環境変数をセットする(stagingとprod)
+```
+$ heroku config:set RACK_ENV=production RAILS_ENV=production RAILS_LOG_TO_STDOUT=enabled RAILS_SERVE_STATIC_FILES=enabled
 
 # 環境変数できてるか確認
 $ heroku config -a <アプリ名>
 ```
-herokuのstackをコンテナに変更
+
+#### herokuのstackをコンテナに変更
 ```
 api $ heroku stack:set container -a <アプリ名>
-```
 
-コンテナに変更されているか確認
-```
+#コンテナに変更されているか確認
 api $ heroku stack
 ```
 
-## デプロイ
+### serverデプロイ
 ```
 # staging
 api $ git push staging master
@@ -87,10 +111,12 @@ api $ git push staging master
 api $ git push prod master
 ```
 
-`ArgumentError: Missing `secret_key_base` for 'production' environment, set this string with `rails credentials:edit``
+
+`ArgumentError: Missing 'secret_key_base' for 'production' environment, set this string with 'rails credentials:edit'`
 のエラーがまだ出ている状態
 
-herokuBD設定
+
+#### herokuBD設定
 ```
 api $ heroku addons:create heroku-postgresql:hobby-dev -a <アプリ名>
 
@@ -101,17 +127,18 @@ api $ heroku addons
 api $ heroku run rails db:migrate -a <アプリ名>
 ```
 
-herokuにマスターキーを追加
+#### herokuにマスターキーを追加
 ```
 api $ heroku config:set RAILS_MASTER_KEY=`cat config/master.key` -a <アプリ名>
+```
 
-#再度DBの初期化を行う
+#### 再度DBの初期化を行う
 
 ```
 heroku run rails db:migrate -a <アプリ名>
 ```
 
-herokuタイムゾーンの確認
+#### herokuタイムゾーンの確認
 ```
 #Herokuアプリに入る
 api $ heroku run sh -a <アプリ名>
@@ -125,11 +152,10 @@ Fri Jun  5 09:17:55 JST 2020
 ~$ exit
 ```
 
-Heroku PostgreSQLのタイムゾーンの確認
+#### Heroku PostgreSQLのタイムゾーンの確認
 ```
 api $ heroku pg:info -a <アプリ名>
 
-...
 #名前
 Add-on: postgresql-dimensional-xxxxx
 
@@ -151,9 +177,9 @@ TimeZone
 :DATABASE=> \q
 ```
 
-Herokuアプリの確認
+#### Herokuアプリの確認
 ```
-api $ heroku open
+api $ heroku open -a <アプリ名>
 ```
 トップページは「ページが見つかりません」になると思うので「/api/v1/hello」にアクセスする
 helloが表示されていれば成功
