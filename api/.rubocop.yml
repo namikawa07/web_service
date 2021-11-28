@@ -1,0 +1,107 @@
+inherit_from: .rubocop_todo.yml
+
+require: rubocop-rails
+
+AllCops:
+  NewCops: enable
+  # 除外ディレクトリ
+  Exclude:
+  - bin/*
+  - db/schema.rb
+  - db/seeds.rb
+  - db/migrate/*
+  - node_modules/**/*
+  - vendor/**/*
+  - config/environments/*
+  - lib/services/iap/test_receipt*.rb
+
+# 日本語のコメントを許可する
+Style/AsciiComments:
+  Enabled: false
+
+# ドキュメントの無い public class を許可する
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyMethod:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - spec/**/*_spec.rb
+    - app/views/**/*.jbuilder
+    - app/admin/**/*
+    - lib/tasks/**/*.rake
+
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - spec/**/*_spec.rb
+    - lib/services/gmo/**/*.rb
+    - lib/tasks/adhoc.rake
+
+Metrics/AbcSize:
+  Max: 30
+  Exclude:
+    - spec/**/*_spec.rb
+
+Metrics/BlockLength:
+  Exclude:
+    - config/routes/**/*
+    - app/views/api/v1/**/*
+    - app/admin/**/*
+    - spec/**/*_spec.rb
+    - spec/factories/**/*.rb
+    - lib/tasks/**/*.rake
+
+Metrics/ClassLength:
+  Enabled: false
+
+Rails/UnknownEnv:
+  Environments:
+    - development
+    - test
+    - production
+    - staging
+
+Rails/SkipsModelValidations:
+  Exclude:
+    - lib/tasks/adhoc.rake
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+  Exclude:
+    - lib/services/gmo/error_checker.rb
+    - lib/tasks/adhoc.rake
+
+Style/ClassAndModuleChildren:
+  Exclude:
+    - spec/support/request_helper.rb
+    - spec/mailers/**/*_preview.rb
+
+Metrics/PerceivedComplexity:
+  Max: 15
+  Exclude:
+    - lib/tasks/adhoc.rake
+
+Naming/VariableNumber:
+  Enabled: false
+
+# has_ から始まるメソッドは許可する
+Naming/PredicateName:
+  ForbiddenPrefixes:
+    - is_
+    - have_
+  NamePrefix:
+    - is_
+    - have_
+
+
+Lint/EmptyBlock:
+  Exclude:
+    - spec/**/*_spec.rb
+    - spec/factories/**/*.rb
+
+Lint/DuplicateBranch:
+  Enabled: false
