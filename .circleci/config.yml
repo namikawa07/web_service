@@ -24,7 +24,7 @@ jobs:
       - run:
           command: |
             gem install bundler
-            bundle config set path 'vendor/bundle'
+            bundle config set path 'api/vendor/bundle'
             bundle install --jobs=4 --retry=3
           working_directory: ~/api
 
