@@ -30,4 +30,5 @@
  /vendor/bundle
 
  /.env
+ .env
 
